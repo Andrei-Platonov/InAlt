@@ -257,7 +257,8 @@ function init(){
     var material = new THREE.MeshPhongMaterial({color:0x00ffff});
 
     var mesh = new THREE.Mesh( geometry, shader_material );
-    finger_mesh.rotation.x = Math.PI/2;
+    finger_mesh.rotation.x = -Math.PI/2;
+    finger_mesh.scale.set(3,3,3);
     
     obj.add( finger_mesh.clone() );
     scene.add(obj);
@@ -331,7 +332,7 @@ function updateMeshes(hand){
         handMeshes[i].position.set(mid.x,mid.y,mid.z);
     
         // compute the length of the bone
-        //handMeshes[i].scale.z = p0.distanceTo(p1);
+        handMeshes[i].scale.z = p0.distanceTo(p1)/100;
     
         // compute orientation of the bone
         handMeshes[i].lookAt(p1);
@@ -360,7 +361,7 @@ function updateMeshes(hand){
           handMeshes[i].position.set(mid.x,mid.y,mid.z);
     
           // compute the length of the bone
-          //handMeshes[i].scale.z = p0.distanceTo(p1)/40;
+          handMeshes[i].scale.z = p0.distanceTo(p1)/100;
     
           // compute orientation of the bone
           handMeshes[i].lookAt(p1);
