@@ -11,6 +11,8 @@ import { RenderPass } from '/src/jsm/postprocessing/RenderPass.js';
 import { AfterimagePass } from '/src/jsm/postprocessing/AfterimagePass.js';
 import { OutlinePass } from '/src/jsm/postprocessing/OutlinePass.js';
 import { UnrealBloomPass } from '/src/jsm/postprocessing/UnrealBloomPass.js';
+import { GLTFLoader } from '/src/jsm/loaders/GLTFLoader.js';
+
 
 // Costum objects setup
 import * as EnvironmentSceneLights from '/src/effects/Lights/EnvironmentSceneLights.js';
@@ -21,7 +23,7 @@ import * as EnvironmentSceneLights from '/src/effects/Lights/EnvironmentSceneLig
 var dbg, capture;
 
 // three js
-var scene, camera, renderer, gui, geometry;
+var scene, camera, renderer, gui, geometry, finger_mesh;
 
 // lights
 let movingPointLights = [];
@@ -76,6 +78,40 @@ var palms = [0,1,2,5,9,13,17] //landmark indices that represent the palm
 var bones =true;
 
 let uniforms, clock;
+
+// Instantiate a loader
+const loader = new GLTFLoader();
+
+// Load a glTF resource
+loader.load(
+	// resource URL
+	'assets/scene.gltf',
+	// called when the resource is loaded
+	function ( gltf ) {
+
+    finger_mesh = gltf.scene;
+    init();
+		gltf.animations; // Array<THREE.AnimationClip>
+		gltf.scene; // THREE.Group
+		gltf.scenes; // Array<THREE.Group>
+		gltf.cameras; // Array<THREE.Camera>
+		gltf.asset; // Object
+
+	},
+	// called while loading is progressing
+	function ( xhr ) {
+
+		console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+    
+
+	},
+	// called when loading has errors
+	function ( error ) {
+
+		console.log( 'An error happened' );
+
+	}
+);
  
 function init(){
 
@@ -221,14 +257,14 @@ function init(){
     var material = new THREE.MeshPhongMaterial({color:0x00ffff});
 
     var mesh = new THREE.Mesh( geometry, shader_material );
-    mesh.rotation.x = Math.PI/2;
+    finger_mesh.rotation.x = Math.PI/2;
     
-    obj.add( mesh );
+    obj.add( finger_mesh.clone() );
     scene.add(obj);
     handMeshes.push(obj);
   }
 
-
+  console.log(handMeshes);
   // Load the MediaPipe handpose model assets.
   handpose.load().then(function(_model){
   console.log("model initialized.")
@@ -265,7 +301,7 @@ function init(){
 
 }
 
-init();
+//init();
 
 
 // update threejs object position and orientation from the detected hand pose
@@ -295,7 +331,7 @@ function updateMeshes(hand){
         handMeshes[i].position.set(mid.x,mid.y,mid.z);
     
         // compute the length of the bone
-        handMeshes[i].scale.z = p0.distanceTo(p1);
+        //handMeshes[i].scale.z = p0.distanceTo(p1);
     
         // compute orientation of the bone
         handMeshes[i].lookAt(p1);
@@ -324,7 +360,7 @@ function updateMeshes(hand){
           handMeshes[i].position.set(mid.x,mid.y,mid.z);
     
           // compute the length of the bone
-          handMeshes[i].scale.z = p0.distanceTo(p1);
+          //handMeshes[i].scale.z = p0.distanceTo(p1)/40;
     
           // compute orientation of the bone
           handMeshes[i].lookAt(p1);
